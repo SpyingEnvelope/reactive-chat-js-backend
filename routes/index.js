@@ -101,6 +101,16 @@ const userSchema = new Schema({
 // Model for storing username information
 const UsernameData = mongoose.model('User', userSchema);
 
+// Schema for storing bugs
+const bugSchema = new Schema({
+  bug: String,
+  antecedent: String,
+  date: Date
+});
+
+// Model for storing bug information
+const BugsData = mongoose.model('Bug', bugSchema);
+
 /* POST to get all information associated with a user */
 router.post('/api/retrieve', async(req, res) => {
   console.log('I am in index.js POST /api/retrieve');
@@ -200,7 +210,7 @@ router.delete('/api/delete', async (req, res) => {
 
 router.post('/api/login', async (req, res) => {
   console.log('I am in POST /api/login');
-  if (!req.body.password || req.body.username) {
+  if (!req.body.password || !req.body.username) {
     return res.json({'error': 'missing fields'})
   }
   try {
@@ -249,6 +259,28 @@ router.post('/api/register', async (req, res) => {
     }
 
     res.json({'success': 'User registered successfully'})
+  } catch (error) {
+    console.log(error);
+    res.json({'error': 'failed'})
+  }
+})
+
+router.post('/api/report', async (req, res) => {
+  console.log('I am in POST /api/report');
+  if (!req.body.bug || !req.body.antecedent) {
+    return res.json({'error': 'fields missing'})
+  }
+  try {
+    const newBug = new BugsData({
+      bug: req.body.bug,
+      antecedent: req.body.antecedent,
+      date: new Date()
+    })
+    const savedBug = await newBug.save();
+    if (!savedBug['_id']) {
+      throw new Error('Failed to save bug ' + req.body.bug);
+    };
+    res.json({'success': 'reported'})
   } catch (error) {
     console.log(error);
     res.json({'error': 'failed'})
