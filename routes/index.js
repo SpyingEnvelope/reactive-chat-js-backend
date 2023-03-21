@@ -7,61 +7,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 require("dotenv").config()
 const mySecretURI = process.env["MONGO_URI"];
-
-const initializeArray = [
-  {
-      text: 'School',
-      type: 'text',
-      visible: true,
-      image: 'https://storage.googleapis.com/symbols/sclera/school_3.png',
-      background: 'blue',
-      page: 'homepage',
-      user: 'gadi800',
-      profile: 'default',
-      row: 1,
-      column: 1,
-      speak: true,
-  },
-  {
-      text: 'Okay',
-      type: 'text',
-      visible: true,
-      image: 'https://storage.googleapis.com/symbols/arasaac/ok.png',
-      background: 'pink',
-      page: 'homepage',
-      user: 'gadi800',
-      profile: 'default',
-      row: 1,
-      column: 2,
-      speak: true,
-  },
-  {
-      text: 'Love',
-      type: 'text',
-      visible: true,
-      image: 'https://storage.googleapis.com/symbols/arasaac/love.png',
-      background: 'purple',
-      page: 'homepage',
-      user: 'gadi800',
-      profile: 'default',
-      row: 1,
-      column: 3,
-      speak: true,
-  },
-  {
-      text: 'Open',
-      type: 'text',
-      visible: true,
-      image: 'https://storage.googleapis.com/symbols/arasaac/open.png',
-      background: 'green',
-      page: 'homepage',
-      user: 'gadi800',
-      profile: 'default',
-      row: 1,
-      column: 4,
-      speak: true,
-  },
-]
+const initializeArray = require('../controllers/initArray.js')
 
 // How many salt rounds to use for bcrypt
 const saltRounds = 10;
@@ -85,7 +31,8 @@ const itemSchema = new Schema({
   profile: String,
   row: Number,
   column: Number,
-  speak: Boolean
+  speak: Boolean,
+  date: Date
 })
 
 // Model for storing items
@@ -130,7 +77,8 @@ router.post('/api/retrieve', async(req, res) => {
           profile: item.profile,
           row: item.row,
           column: item.column,
-          speak: true
+          speak: true,
+          date: new Date()
         }
         const newItem = new ItemData(dataBody);
         const saveReponse = await newItem.save();
@@ -181,7 +129,9 @@ router.post('/api/create', async (req, res) => {
     return res.json({'error': 'missing fields'});
   };
   try {
-    const newItem = new ItemData(req.body);
+    const objectData = req.body;
+    objectData.date = new Date();
+    const newItem = new ItemData(objectData);
     const saveReponse = await newItem.save();
     if (!saveReponse['_id']) {
       throw new Error('Failed to save item ' + req.body.text)
