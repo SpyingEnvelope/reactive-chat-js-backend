@@ -64,19 +64,18 @@ router.post('/api/retrieve', async(req, res) => {
   try {
     let responseData = await ItemData.find({user: req.body.username})
     if (responseData.length == 0) {
-      // throw new Error('Could not find any data associated with this user');
-      initializeArray.forEach(async (item) => {
+      for (let i = 0; i < initializeArray.length; i++) {
         const dataBody = {
-          text: item.text,
-          type: item.type,
-          visible: item.visible,
-          image: item.image,
-          background: item.background,
-          page: item.page,
+          text: initializeArray[i].text,
+          type: initializeArray[i].type,
+          visible: initializeArray[i].visible,
+          image: initializeArray[i].image,
+          background: initializeArray[i].background,
+          page: initializeArray[i].page,
           user: req.body.username,
-          profile: item.profile,
-          row: item.row,
-          column: item.column,
+          profile: initializeArray[i].profile,
+          row: initializeArray[i].row,
+          column: initializeArray[i].column,
           speak: true,
           date: new Date()
         }
@@ -85,7 +84,7 @@ router.post('/api/retrieve', async(req, res) => {
         if (!saveReponse['_id']) {
           throw new Error('Failed to save item ' + dataBody.text)
         }
-      })
+      }
       responseData = await ItemData.find({user: req.body.username})
     };
     res.send(responseData);
