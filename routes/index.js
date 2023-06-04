@@ -3,10 +3,13 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt')
 const cors = require('cors');
+const OAuth = require('oauth');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 require("dotenv").config()
 const mySecretURI = process.env["MONGO_URI"];
+const nounKey = process.env["NOUN_KEY"];
+const nounSecret = process.env["NOUN_SECRET"];
 const initializeArray = require('../controllers/initArray.js')
 
 // How many salt rounds to use for bcrypt
@@ -234,6 +237,34 @@ router.post('/api/report', async (req, res) => {
     console.log(error);
     res.json({'error': 'failed'})
   }
+})
+
+// API endpoint for seraching images with the noun project
+router.get('/api/search/images', (req, res) => {
+  console.log("I am in /api/search/images")
+  console.log(req.query);
+  let oauth = new OAuth.OAuth(
+    'https://api.thenounproject.com',
+    'https://api.thenounproject.com',
+    nounKey,
+    nounSecret,
+    '1.0',
+    null,
+    'HMAC-SHA1'
+  )
+  oauth.get(
+    `https://api.thenounproject.com/v2/icon?query=${req.query.query}&limit=10`,
+    null,
+    null,
+    function(e, data) {
+      if (e) {
+        console.log(e);
+        res.json({"error": "Failed to authenticate"})
+      }
+      const parsedData = JSON.parse(data);
+      res.json(parsedData);
+    }
+  )
 })
 
 module.exports = router;
